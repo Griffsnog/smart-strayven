@@ -58,8 +58,13 @@ void displayValues () {
   display.clearDisplay();           //clear the display, so the stuff that was here before is no longer here
   display.setTextSize(TEXT_SIZE);   //set the size of the text
   display.setTextColor(WHITE);      //set the color of text text
+
   display.setCursor( (SCREEN_WIDTH/2) - ((ammoToPrint.length()*2) * (TEXT_SIZE * 1.5)), (SCREEN_HEIGHT/2) - (TEXT_SIZE * 3) );  //center text
   display.print(ammoToPrint);     //print the text
+
+	display.setCursor(0, 50);
+  display.print(chronoToPrint);
+
   display.display();                //display the text
 }
 
