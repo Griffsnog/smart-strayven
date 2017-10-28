@@ -13,8 +13,12 @@
 #define IR_MAP_TRIP_VAL 95
 #define DART_LEGNTH_FEET 0.2362208333
 
+#define R1 100000.0
+#define R2 10000.0
+
 //io pins
 #define IR_RECEIVER_PIN 0
+#define VOLTMETER_PIN 1
 
 //pins for buttons
 #define TRIGGER_BTN_PIN 1
@@ -38,7 +42,7 @@ byte maxAmmo = magSizeArr[currentMagSize];    //keep track of what the max ammo 
 
 double tripTime, exitTime;	//values to keep track of chrono timing
 
-String chronoToPrint, ammoToPrint;		//keep track of what  vals to print
+String chronoToPrint, ammoToPrint, voltageToPrint;		//keep track of what  vals to print
 
 //this code will run when the Arduino turns on
 void setup() {
@@ -51,6 +55,7 @@ void loop() {
   chrono();    //count ammo, constantly check for the trigger switch to be pressed to count
   reload();       //reload, constantly check for the magazine switch to be pressed/not pressed
   toggleMags();   //toggle between magazine sizes, constanly check for the magazine toggle switch to be pressed
+  voltMeter();
 }
 
 //actually dispaly ammo onto screen
@@ -64,6 +69,9 @@ void displayValues () {
 
 	display.setCursor(0, 50);
   display.print(chronoToPrint);
+
+  display.setCursor(60, 50);
+	display.print(voltageToPrint);
 
   display.display();                //display the text
 }
@@ -151,5 +159,27 @@ void toggleMags () {
     currentAmmo = maxAmmo;
 
     initDisplayAmmo();      //display ammo
+  }
+}
+
+//values for time checking on voltage
+double lastVoltageCheckTime = 0;
+int delayTime = 500;
+
+//check and calculate and display voltage (RHETORICAL STRATEGY: POLYSYNDETON)
+void voltMeter () {
+  //make sure only prints every .5 sec
+  if (millis() >= lastVoltageCheckTime + delayTime) {
+    //calculate voltage
+    float voltageIn = ((analogRead(VOLTMETER_PIN) * 1) / 1) ;
+
+    //make sure voltage is above 0.03, since it could be an error
+    if (voltageIn < 0.5) {
+      voltageIn = 0; 
+    }
+
+    voltageToPrint = ((String)voltageIn + " v");
+
+    lastVoltageCheckTime = millis();
   }
 }
