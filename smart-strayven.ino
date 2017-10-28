@@ -13,8 +13,15 @@
 #define IR_MAP_TRIP_VAL 95
 #define DART_LEGNTH_FEET 0.2362208333
 
+
+//for voltmeter
 #define R1 100000.0
 #define R2 10000.0
+
+//for PWM
+#define POT_IN_PIN 0
+#define PWM_OUT_PIN 3
+#define MOTOR_ACCEL_TIME 200
 
 //io pins
 #define IR_RECEIVER_PIN 0
@@ -34,6 +41,7 @@ Adafruit_SSD1306 display(OLED_RESET);     //display
 
 Button reloadBtn (RELOAD_BTN_PIN, PULLUP, INVERT, DEBOUNCE_MS);         //reloading button
 Button magSzTogBtn (MAG_SZ_TOG_BTN_PIN, PULLUP, INVERT, DEBOUNCE_MS);   //magazine size toggle button
+Button triggerBtn (TRIGGER_BTN_PIN, PULLUP, INVERT, DEBOUNCE_MS);
 
 byte magSizeArr[] = {5, 6, 10, 12, 15, 18, 20, 22, 25, 36, 0};  //keep track of the magazine sizes
 byte currentMagSize = 0;  //keep track of the current magazine size
@@ -41,6 +49,8 @@ byte currentAmmo = magSizeArr[currentMagSize];    //keep track of how much ammo 
 byte maxAmmo = magSizeArr[currentMagSize];    //keep track of what the max ammo is, for use when reloading 
 
 double tripTime, exitTime;	//values to keep track of chrono timing
+
+boolean hasAccelerated = false;
 
 String chronoToPrint, ammoToPrint, voltageToPrint;		//keep track of what  vals to print
 
@@ -183,3 +193,18 @@ void voltMeter () {
     lastVoltageCheckTime = millis();
   }
 }
+
+void pwm () {
+	triggerBtn.read();                                          //read trigger so later can check if pressed/released
+	if(triggerBtn.isPressed() && !hasAccelerated) {				//when trigger first pressed
+		digitalWrite(PWM_OUT_PIN, HIGH);						//motor at full power
+		delay(MOTOR_ACCEL_TIME);								//allow motor to reach full speed
+		hasAccelerated = true;									//allow pwm
+	} else if (triggerBtn.isPressed() && hasAccelerated) {		//if trigger pressed
+		analogWrite(PWM_OUT_PIN, analogRead(POT_IN_PIN)/4);		//write PWM depending on pot value
+	} else if (triggerBtn.wasReleased()) {						//when trigger released
+		digitalWrite(PWM_OUT_PIN, LOW);							//turn motor off
+		hasAccelerated = false;									//reset flag to check for acceleration
+}
+}
+
