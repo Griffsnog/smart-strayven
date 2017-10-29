@@ -82,10 +82,10 @@ void displayValues () {
   display.print(ammoToPrint);     //print the text
 
 	display.setTextSize(1);
-	display.setCursor(0, 45);
+	display.setCursor(0, 50);
   display.print(chronoToPrint);
 
-  display.setCursor(60, 45);
+  display.setCursor(60, 50);
 	display.print(voltageToPrint);
 
 	int lineLength = lastPotReading * 8;
