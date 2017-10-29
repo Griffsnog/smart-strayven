@@ -20,7 +20,7 @@
 #define R2 10000.0
 
 //for PWM
-#define POT_PIN 0
+#define POT_PIN 2
 #define PWM_OUT_PIN 3
 #define MOTOR_ACCEL_TIME 200
 #define PWM_MAPPED_MAX_OUTPUT_THRESHOLD 16
@@ -30,9 +30,9 @@
 #define VOLTMETER_PIN 1
 
 //pins for buttons
-#define TRIGGER_BTN_PIN 1
-#define RELOAD_BTN_PIN 4
-#define MAG_SZ_TOG_BTN_PIN 5
+#define TRIGGER_BTN_PIN 4
+#define RELOAD_BTN_PIN 7
+#define MAG_SZ_TOG_BTN_PIN 8
 
 //parameters for buttons
 #define INVERT true
