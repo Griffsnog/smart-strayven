@@ -8,20 +8,22 @@
 
 //initialize stuff for display
 #define OLED_RESET 4
-#define TEXT_SIZE 8
+
+//text sizes
+#define AMMO_TEXT_SIZE 6
 
 #define IR_MAP_TRIP_VAL 95
 #define DART_LEGNTH_FEET 0.2362208333
-
 
 //for voltmeter
 #define R1 100000.0
 #define R2 10000.0
 
 //for PWM
-#define POT_IN_PIN 0
+#define POT_PIN 0
 #define PWM_OUT_PIN 3
 #define MOTOR_ACCEL_TIME 200
+#define PWM_MAPPED_MAX_OUTPUT_THRESHOLD 16
 
 //io pins
 #define IR_RECEIVER_PIN 0
@@ -51,6 +53,7 @@ byte maxAmmo = magSizeArr[currentMagSize];    //keep track of what the max ammo 
 double tripTime, exitTime;	//values to keep track of chrono timing
 
 boolean hasAccelerated = false;
+int lastPotReading = 0;
 
 String chronoToPrint, ammoToPrint, voltageToPrint;		//keep track of what  vals to print
 
@@ -66,22 +69,29 @@ void loop() {
   reload();       //reload, constantly check for the magazine switch to be pressed/not pressed
   toggleMags();   //toggle between magazine sizes, constanly check for the magazine toggle switch to be pressed
   voltMeter();
+  pwm();
 }
 
 //actually dispaly ammo onto screen
 void displayValues () {
   display.clearDisplay();           //clear the display, so the stuff that was here before is no longer here
-  display.setTextSize(TEXT_SIZE);   //set the size of the text
   display.setTextColor(WHITE);      //set the color of text text
 
-  display.setCursor( (SCREEN_WIDTH/2) - ((ammoToPrint.length()*2) * (TEXT_SIZE * 1.5)), (SCREEN_HEIGHT/2) - (TEXT_SIZE * 3) );  //center text
+  display.setTextSize(AMMO_TEXT_SIZE);   //set the size of the text
+  display.setCursor( (SCREEN_WIDTH/2) - ((ammoToPrint.length()*2) * (AMMO_TEXT_SIZE * 1.5)), (SCREEN_HEIGHT/2) - (AMMO_TEXT_SIZE * 3) );  //center text
   display.print(ammoToPrint);     //print the text
 
-	display.setCursor(0, 50);
+	display.setTextSize(1);
+	display.setCursor(0, 45);
   display.print(chronoToPrint);
 
-  display.setCursor(60, 50);
+  display.setCursor(60, 45);
 	display.print(voltageToPrint);
+
+	int lineLength = lastPotReading * 8;
+	display.drawLine(0, 61, lineLength, 61, WHITE);
+  display.drawLine(0, 62, lineLength, 62, WHITE);
+  display.drawLine(0, 63, lineLength, 63, WHITE);
 
   display.display();                //display the text
 }
@@ -201,10 +211,15 @@ void pwm () {
 		delay(MOTOR_ACCEL_TIME);								//allow motor to reach full speed
 		hasAccelerated = true;									//allow pwm
 	} else if (triggerBtn.isPressed() && hasAccelerated) {		//if trigger pressed
-		analogWrite(PWM_OUT_PIN, analogRead(POT_IN_PIN)/4);		//write PWM depending on pot value
+		analogWrite(PWM_OUT_PIN, analogRead(POT_PIN)/4);		//write PWM depending on pot value
 	} else if (triggerBtn.wasReleased()) {						//when trigger released
 		digitalWrite(PWM_OUT_PIN, LOW);							//turn motor off
 		hasAccelerated = false;									//reset flag to check for acceleration
-}
+	}
+
+	if (map(analogRead(POT_PIN), 0, 1010, 0, 16) != lastPotReading) {
+		lastPotReading = map(analogRead(POT_PIN), 0, 1010, 0, PWM_MAPPED_MAX_OUTPUT_THRESHOLD);
+		displayValues();
+	}
 }
 
