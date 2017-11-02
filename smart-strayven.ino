@@ -2,6 +2,8 @@
 #include <Adafruit_SSD1306.h>
 #include <Button.h>
 
+#include <SoftwareSerial.h>
+
 //set the height and width of the screen
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -61,10 +63,12 @@ String chronoToPrint, ammoToPrint, voltageToPrint;		//keep track of what  vals t
 void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);    //begin stuff for the display
   initDisplayAmmo();     //show the ammo
-}
+  Serial.begin(9600)
+;}
 
 //this code loops many times a second
 void loop() {
+	Serial.println(analogRead(POT_PIN));
   chrono();    //count ammo, constantly check for the trigger switch to be pressed to count
   reload();       //reload, constantly check for the magazine switch to be pressed/not pressed
   toggleMags();   //toggle between magazine sizes, constanly check for the magazine toggle switch to be pressed
